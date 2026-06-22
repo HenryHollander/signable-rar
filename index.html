@@ -38,8 +38,10 @@
                 a.classList.toggle('active', a.getAttribute('href') === '#' + hash);
             });
 
+            document.querySelector('nav').style.display = hash === 'broker' ? 'none' : '';
+
             if (pages[hash]) {
-                content.innerHTML = `<iframe src="${pages[hash]}"></iframe>`;
+                content.innerHTML = `<iframe src="${pages[hash]}" style="height:${hash === 'broker' ? '100vh' : 'calc(100vh - 44px)'}"></iframe>`;
             } else {
                 content.innerHTML = `<div class="home">
                     <h2>Select a document</h2>
