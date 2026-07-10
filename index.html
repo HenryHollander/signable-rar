@@ -17,16 +17,35 @@
 </head>
 <body>
     <nav>
-        <a href="#rar">Replacement Advise Record</a>
-        <a href="#quote">Momentum Life Quotation</a>
+        <a href="#lifeclientrar">Client Replacement Advice Record</a>
+        <a href="#lifebrokerrar">Broker Replacement Advice Record</a>
+        <a href="#lifequote">Momentum Life Quotation</a>
+        <a href="#sticlientproposal">Client Short Term Proposal</a>
+        <a href="#stibrokerproposal">Broker Short Term Proposal</a>
     </nav>
     <div id="content"></div>
 
     <script>
         const pages = {
-            rar: 'Client Replacement Advice Record.html',
-            quote: 'Momentum Life Quotation.html',
-            broker: 'Broker Replacement Advice Record.html'
+            lifeclientrar:    'Client Replacement Advice Record.html',
+            lifequote:        'Momentum Life Quotation.html',
+            sticlientproposal:'Client Short Term Proposal.html',
+            lifebrokerrar:    'Broker Replacement Advice Record.html',
+            stibrokerproposal:'Broker Short TermProposal.html'
+        };
+
+        const subIndexes = {
+            lifeclient: {
+                links: [
+                    { hash: 'lifeclientrar', label: 'Client Replacement Advice Record' },
+                    { hash: 'lifequote',     label: 'Momentum Life Quotation' }
+                ]
+            }
+        };
+
+        const pageSubIndex = {
+            lifeclientrar: 'lifeclient',
+            lifequote:     'lifeclient'
         };
 
         function render() {
@@ -38,15 +57,43 @@
                 a.classList.toggle('active', a.getAttribute('href') === '#' + hash);
             });
 
-            document.querySelector('nav').style.display = hash === 'broker' ? 'none' : '';
-
             if (pages[hash]) {
-                content.innerHTML = `<iframe src="${pages[hash]}" style="height:${hash === 'broker' ? '100vh' : 'calc(100vh - 44px)'}"></iframe>`;
+                const parentKey = pageSubIndex[hash];
+                const parent = parentKey && subIndexes[parentKey];
+                if (parent) {
+                    document.querySelector('nav').style.display = 'none';
+                    const navItems = parent.links.map(l => `<a href="#${l.hash}" style="color:${l.hash===hash?'#fff':'#e0e0e0'};text-decoration:none;padding:6px 14px;border-radius:4px;font-size:14px;${l.hash===hash?'background:#4a4a8a;':''}">${l.label}</a>`).join('');
+                    content.innerHTML = `
+                        <nav style="background:#1a1a2e;padding:12px 24px;display:flex;gap:16px;">
+                            ${navItems}
+                        </nav>
+                        <iframe src="${pages[hash]}" style="height:calc(100vh - 44px);border:none;width:100%;display:block;"></iframe>`;
+                } else {
+                    document.querySelector('nav').style.display = 'none';
+                    content.innerHTML = `<iframe src="${pages[hash]}" style="height:100vh"></iframe>`;
+                }
+            } else if (subIndexes[hash]) {
+                document.querySelector('nav').style.display = 'none';
+                const subLinks = subIndexes[hash].links;
+                const navItems = subLinks.map(l => `<a href="#${l.hash}">${l.label}</a>`).join('');
+                const homeItems = subLinks.map(l => `<a href="#${l.hash}">${l.label}</a>`).join('');
+                content.innerHTML = `
+                    <nav style="background:#1a1a2e;padding:12px 24px;display:flex;gap:16px;">
+                        ${navItems}
+                    </nav>
+                    <div class="home">
+                        <h2>Select a document</h2>
+                        ${homeItems}
+                    </div>`;
             } else {
+                document.querySelector('nav').style.display = '';
                 content.innerHTML = `<div class="home">
                     <h2>Select a document</h2>
-                    <a href="#rar">Replacement Advice Record</a>
-                    <a href="#quote">Momentum Life Quotation</a>
+                    <a href="#lifeclientrar">Client Replacement Advice Record</a>
+                    <a href="#lifebrokerrar">Broker Replacement Advice Record</a>
+                    <a href="#lifequote">Momentum Life Quotation</a>
+                    <a href="#sticlientproposal">Client Short Term Proposal</a>
+                    <a href="#stibrokerproposal">Broker Short Term Proposal</a>
                 </div>`;
             }
         }
