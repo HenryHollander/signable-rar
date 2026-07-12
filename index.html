@@ -31,8 +31,11 @@
             lifequote:        'Momentum Life Quotation.html',
             sticlientproposal:'Client Short Term Proposal.html',
             lifebrokerrar:    'Broker Replacement Advice Record.html',
-            stibrokerproposal:'Broker Short TermProposal.html'
+            stibrokerproposal:'Broker Short TermProposal.html',
+            roadmap:          'Laminin_Demo_Roadmap_Mobile.html'
         };
+
+        const lockedHashes = new Set(['roadmap']);
 
         const subIndexes = {
             lifeclient: {
@@ -50,6 +53,12 @@
 
         function render() {
             const hash = location.hash.slice(1);
+
+            if (lockedHashes.has(location._lockedTo) && !lockedHashes.has(hash)) {
+                location.hash = location._lockedTo;
+                return;
+            }
+            location._lockedTo = lockedHashes.has(hash) ? hash : null;
             const content = document.getElementById('content');
             const links = document.querySelectorAll('nav a');
 
