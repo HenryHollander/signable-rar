@@ -442,7 +442,7 @@ body { font-family: Arial, sans-serif; background: #D8E5EF; min-height: 100vh; d
 #section-crm .focus-section { padding:0 24px 0 0; }
 #section-crm .ai-stage-section { padding:8px 24px 0 0; }
 #section-crm #crm-branch-slot .branch-wrap { padding:8px 24px 0 0; }
-@media (max-width:1000px){
+@media (orientation:portrait){
   .crm-split { flex-direction:column; gap:0; padding:0; }
   .crm-split-left, .crm-split-right { width:100%; }
   .crm-split-right { padding-top:0; }
@@ -1384,9 +1384,9 @@ function buildRing() {
 
   // Re-point the selected bubble (animated) when the 1000px breakpoint is crossed,
   // keeping the diagram visually linked to the panel that moves right<->below.
-  let wasMobile = window.matchMedia("(max-width: 1000px)").matches;
+  let wasMobile = window.matchMedia("(orientation: portrait)").matches;
   window.addEventListener("resize", () => {
-    const isMobile = window.matchMedia("(max-width: 1000px)").matches;
+    const isMobile = window.matchMedia("(orientation: portrait)").matches;
     if (isMobile !== wasMobile) {
       wasMobile = isMobile;
       if (selectedIdx !== null && !animating) rotateTo(selectedIdx);
