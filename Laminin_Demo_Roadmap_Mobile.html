@@ -1350,7 +1350,7 @@ function buildRing() {
   // Rest angle depends on layout: 3 o'clock (right) when the panel sits beside the
   // diagram (>1000px); 6 o'clock (bottom) when it stacks below (<=1000px).
   function restConst() {
-    return window.matchMedia("(max-width: 1000px)").matches ? Math.PI : Math.PI / 2;
+    return window.matchMedia("(orientation: portrait)").matches ? Math.PI : Math.PI / 2;
   }
   let selectedIdx = null;
 
