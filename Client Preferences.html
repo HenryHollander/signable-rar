@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Client Preferences</title>
+<style>
+  :root { --navy:#1F3864; --line:#CCCCCC; --bg:#F2F2F2; --blue:#0052FF; }
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; color:#222; }
+  h1 { color: var(--navy); font-size: 26px; margin-bottom: 6px; }
+  h2 { color: var(--navy); font-size: 18px; margin-top: 34px; margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  p.intro { margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  td { border: 1px solid var(--line); padding: 10px 12px; vertical-align: middle; }
+  td.label { background: var(--bg); font-weight: bold; width: 220px; }
+  td.field input, td.field select { width: 100%; border: none; font-family: inherit; font-size: 14px; padding: 4px 2px; background: transparent; }
+  td.field input:focus, td.field select:focus { outline: 1px solid var(--navy); }
+  ol { padding-left: 20px; }
+  li { margin-bottom: 18px; }
+  li p.q { margin: 0 0 6px 0; }
+  li label.ans { display: block; font-style: italic; color: #666; font-size: 13px; margin-bottom: 4px; }
+  li textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 3px; font-family: inherit; font-size: 14px; padding: 8px; resize: vertical; min-height: 40px; }
+  li textarea:focus { outline: 1px solid var(--navy); border-color: var(--navy); }
+  .subheading { font-weight: bold; margin: 24px 0 10px; }
+  .actions { margin-top: 36px; text-align: right; }
+  button { font-family: inherit; font-size: 14px; padding: 8px 16px; border-radius: 4px; border: 1px solid var(--navy); background: var(--navy); color: #fff; cursor: pointer; }
+  button:hover { background: #16294c; }
+
+  /* ── Slider Section ── */
+  .pref-section { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 28px 30px 24px; margin-bottom: 30px; }
+  .pref-section h2 { border-bottom: none; margin-top: 0; margin-bottom: 4px; font-size: 22px; }
+  .pref-section p.sub { color: #555; margin: 0 0 8px; font-size: 14px; }
+  .def-toggle { color: var(--blue); font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; margin-bottom: 18px; }
+  .def-toggle:hover { text-decoration: underline; }
+
+  /* Definitions panel */
+  .definitions { display: none; background: var(--bg); border-radius: 6px; padding: 20px 24px; margin-bottom: 22px; }
+  .definitions.open { display: block; }
+  .definitions h3 { font-size: 17px; color: var(--navy); margin: 0 0 4px; }
+  .definitions p.def-sub { color: #555; font-size: 13px; margin: 0 0 16px; }
+  .def-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+  .def-item:last-child { margin-bottom: 0; }
+  .def-icon { width: 36px; height: 36px; border-radius: 8px; background: #E8EEFB; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+  .def-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+  .def-text p { margin: 0; font-size: 13px; color: #444; }
+
+  /* Slider cards */
+  .slider-card { background: var(--bg); border-radius: 8px; padding: 16px 20px 18px; margin-bottom: 12px; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+  .slider-wrap { position: relative; }
+  .slider-wrap input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 4px; background: var(--blue); border-radius: 2px; outline: none; margin: 0;
+  }
+  .slider-wrap input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--blue);
+    border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: pointer;
+  }
+  .slider-wrap input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--blue);
+    border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: pointer;
+  }
+  .slider-ticks { display: flex; justify-content: space-between; padding: 4px 0 0; }
+  .slider-ticks span { width: 1px; height: 6px; background: #bbb; }
+  .slider-value { text-align: center; font-size: 12px; color: #666; margin-top: 4px; }
+
+  /* Show preferences button */
+  .btn-show { display: block; width: 280px; margin: 20px auto 0; padding: 12px 0; background: var(--blue); color: #fff; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; }
+  .btn-show:hover { background: #003FCC; }
+
+  /* Preferences summary */
+  .pref-summary { background: #E8EEFB; border-radius: 6px; padding: 16px 20px; margin-top: 16px; display: none; }
+  .pref-summary h4 { margin: 0 0 10px; color: var(--navy); font-size: 15px; }
+  .pref-summary .pref-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #D0D8E8; }
+  .pref-summary .pref-row:last-child { border-bottom: none; }
+  .pref-summary .pref-label { color: #555; }
+  .pref-summary .pref-val { font-weight: 600; color: var(--navy); }
+
+  @media print {
+    .actions { display: none; }
+    .btn-show { display: none; }
+    body { margin: 0; }
+    .pref-summary { display: block !important; }
+    .definitions { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Client Preferences</h1>
+<p class="intro">Complete this form to capture the client's policy preferences.</p>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION: Preference Sliders + Definitions
+     ═══════════════════════════════════════════════════ -->
+<div class="pref-section">
+  <h2>What is important to you?</h2>
+  <p class="sub">Adjust the sliders to help us understand your preferences.</p>
+  <a class="def-toggle" id="defToggle" onclick="toggleDefs()">What do these terms mean again?</a>
+
+  <!-- Definitions Panel -->
+  <div class="definitions" id="defPanel">
+    <h3>We'll help you choose the best cover</h3>
+    <p class="def-sub">No more mumbo-jumbo. Let's explain these four important insurance terms.</p>
+
+    <div class="def-item">
+      <div class="def-icon">&#128179;</div>
+      <div class="def-text">
+        <strong>Monthly premium</strong>
+        <p>This is what you will pay every month for your insurance.</p>
+      </div>
+    </div>
+    <div class="def-item">
+      <div class="def-icon">&#x24C7;</div>
+      <div class="def-text">
+        <strong>Excess</strong>
+        <p>This is an agreed amount you will pay in when you have a claim.</p>
+      </div>
+    </div>
+    <div class="def-item">
+      <div class="def-icon">&#128196;</div>
+      <div class="def-text">
+        <strong>Essential cover</strong>
+        <p>This is crucial to have. For example, it would cover the cost of repairs to your vehicle in case of an incident.</p>
+      </div>
+    </div>
+    <div class="def-item">
+      <div class="def-icon">&#128203;</div>
+      <div class="def-text">
+        <strong>Convenience cover</strong>
+        <p>This is the nice to haves. For example, it would provide accommodation if your vehicle breaks down when you're travelling.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slider 1: Low premiums ↔ Essential cover -->
+  <div class="slider-card">
+    <div class="slider-labels"><span>Low premiums</span><span>Essential cover</span></div>
+    <div class="slider-wrap">
+      <input type="range" id="slider1" name="pref_premium_vs_essential" min="0" max="100" value="50" oninput="updateVal(this)">
+    </div>
+    <div class="slider-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="slider-value" id="slider1_val">Balanced</div>
+  </div>
+
+  <!-- Slider 2: Low premiums ↔ Convenience cover -->
+  <div class="slider-card">
+    <div class="slider-labels"><span>Low premiums</span><span>Convenience cover</span></div>
+    <div class="slider-wrap">
+      <input type="range" id="slider2" name="pref_premium_vs_convenience" min="0" max="100" value="50" oninput="updateVal(this)">
+    </div>
+    <div class="slider-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="slider-value" id="slider2_val">Balanced</div>
+  </div>
+
+  <!-- Slider 3: Low premiums ↔ Low excess -->
+  <div class="slider-card">
+    <div class="slider-labels"><span>Low premiums</span><span>Low excess</span></div>
+    <div class="slider-wrap">
+      <input type="range" id="slider3" name="pref_premium_vs_excess" min="0" max="100" value="50" oninput="updateVal(this)">
+    </div>
+    <div class="slider-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="slider-value" id="slider3_val">Balanced</div>
+  </div>
+
+  <!-- Slider 4: Essential cover ↔ Convenience cover -->
+  <div class="slider-card">
+    <div class="slider-labels"><span>Essential cover</span><span>Convenience cover</span></div>
+    <div class="slider-wrap">
+      <input type="range" id="slider4" name="pref_essential_vs_convenience" min="0" max="100" value="50" oninput="updateVal(this)">
+    </div>
+    <div class="slider-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="slider-value" id="slider4_val">Balanced</div>
+  </div>
+
+  <!-- Slider 5: Essential cover ↔ Low excess -->
+  <div class="slider-card">
+    <div class="slider-labels"><span>Essential cover</span><span>Low excess</span></div>
+    <div class="slider-wrap">
+      <input type="range" id="slider5" name="pref_essential_vs_excess" min="0" max="100" value="50" oninput="updateVal(this)">
+    </div>
+    <div class="slider-ticks"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="slider-value" id="slider5_val">Balanced</div>
+  </div>
+
+  <button class="btn-show" onclick="showPreferences()">Show my preferences</button>
+
+  <!-- Preferences Summary -->
+  <div class="pref-summary" id="prefSummary">
+    <h4>Your Preference Profile</h4>
+    <div id="prefRows"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION: Client Details (original)
+     ═══════════════════════════════════════════════════ -->
+<h2>Client Details</h2>
+<table>
+  <tr>
+    <td class="label">Name and Surname</td>
+    <td class="field"><input type="text" name="name_surname"></td>
+  </tr>
+  <tr>
+    <td class="label">ID Nr</td>
+    <td class="field"><input type="text" name="id_number"></td>
+  </tr>
+  <tr>
+    <td class="label">Product Type</td>
+    <td class="field">
+      <select name="product_type">
+        <option value="" selected>Choose an item.</option>
+        <option value="Personal">Personal</option>
+        <option value="Commercial">Commercial</option>
+        <option value="Agri">Agri</option>
+      </select>
+    </td>
+  </tr>
+</table>
+
+<h2>Preferences</h2>
+<ol>
+  <li>
+    <p class="q">Price sensitivity — is premium the primary driver, or is cover quality paramount? Is there a budget ceiling?</p>
+    <label class="ans" for="q1">Answer:</label>
+    <textarea id="q1" name="q1"></textarea>
+  </li>
+  <li>
+    <p class="q">Excess appetite — comfortable with higher excess / lower premium, or must excesses stay low?</p>
+    <label class="ans" for="q2">Answer:</label>
+    <textarea id="q2" name="q2"></textarea>
+  </li>
+  <li>
+    <p class="q">Insurer preferences — any insurer the client specifically wants or wants to avoid?</p>
+    <label class="ans" for="q3">Answer:</label>
+    <textarea id="q3" name="q3"></textarea>
+  </li>
+  <li>
+    <p class="q">Hard cover requirements — anything non-negotiable (e.g. Excess Buster, specified All Risks, business use on vehicles, solar cover)?</p>
+    <label class="ans" for="q4">Answer:</label>
+    <textarea id="q4" name="q4"></textarea>
+  </li>
+  <li>
+    <p class="q">Known risk factors — thatch roof/lapa, home business, solar, frequent travel, security upgrades planned, recent claims?</p>
+    <label class="ans" for="q5">Answer:</label>
+    <textarea id="q5" name="q5"></textarea>
+  </li>
+</ol>
+
+<div class="subheading">Scoping facts:</div>
+<ol start="6">
+  <li>
+    <p class="q">Target product / variant — specify tier if applicable (e.g. base or upgraded)?</p>
+    <label class="ans" for="q6">Answer:</label>
+    <textarea id="q6" name="q6"></textarea>
+  </li>
+  <li>
+    <p class="q">Prior insurers — who was the client with before, and for how long with the current or proposed insurer?</p>
+    <label class="ans" for="q7">Answer:</label>
+    <textarea id="q7" name="q7"></textarea>
+  </li>
+  <li>
+    <p class="q">Claims history — any claims in the last 5 years? Brief details if yes.</p>
+    <label class="ans" for="q8">Answer:</label>
+    <textarea id="q8" name="q8"></textarea>
+  </li>
+  <li>
+    <p class="q">In-scope sections — Product Line as indicated.</p>
+    <label class="ans" for="q9">Answer:</label>
+    <textarea id="q9" name="q9"></textarea>
+  </li>
+</ol>
+
+<div class="actions">
+  <button onclick="window.print()">Print</button>
+</div>
+
+<script>
+  /* ── Definitions toggle ── */
+  function toggleDefs() {
+    var panel = document.getElementById('defPanel');
+    var toggle = document.getElementById('defToggle');
+    panel.classList.toggle('open');
+    toggle.textContent = panel.classList.contains('open')
+      ? 'Hide definitions'
+      : 'What do these terms mean again?';
+  }
+
+  /* ── Slider metadata ── */
+  var sliderMeta = {
+    slider1: { left: 'Low premiums',   right: 'Essential cover' },
+    slider2: { left: 'Low premiums',   right: 'Convenience cover' },
+    slider3: { left: 'Low premiums',   right: 'Low excess' },
+    slider4: { left: 'Essential cover', right: 'Convenience cover' },
+    slider5: { left: 'Essential cover', right: 'Low excess' }
+  };
+
+  /* ── Interpret slider value as text ── */
+  function interpret(val) {
+    if (val <= 15)  return 'Strongly left';
+    if (val <= 35)  return 'Leans left';
+    if (val <= 65)  return 'Balanced';
+    if (val <= 85)  return 'Leans right';
+    return 'Strongly right';
+  }
+
+  function readableLabel(id) {
+    var v = parseInt(document.getElementById(id).value);
+    var m = sliderMeta[id];
+    if (v <= 15)  return 'Strongly favours ' + m.left;
+    if (v <= 35)  return 'Leans towards ' + m.left;
+    if (v <= 65)  return 'Balanced';
+    if (v <= 85)  return 'Leans towards ' + m.right;
+    return 'Strongly favours ' + m.right;
+  }
+
+  function updateVal(el) {
+    document.getElementById(el.id + '_val').textContent = readableLabel(el.id);
+  }
+
+  /* ── Show preferences summary ── */
+  function showPreferences() {
+    var rows = '';
+    for (var id in sliderMeta) {
+      var m = sliderMeta[id];
+      var label = m.left + '  vs  ' + m.right;
+      var val = readableLabel(id);
+      rows += '<div class="pref-row"><span class="pref-label">' + label + '</span><span class="pref-val">' + val + '</span></div>';
+    }
+    document.getElementById('prefRows').innerHTML = rows;
+    document.getElementById('prefSummary').style.display = 'block';
+  }
+
+  /* ── Initialise labels on load ── */
+  window.addEventListener('DOMContentLoaded', function() {
+    for (var id in sliderMeta) {
+      updateVal(document.getElementById(id));
+    }
+  });
+</script>
+
+</body>
+</html>
